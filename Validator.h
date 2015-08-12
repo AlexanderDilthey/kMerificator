@@ -31,17 +31,18 @@ template<int m, int k, int colours>
 void evaluate_dGS(diploidGenomeString& gS, diploidGenomeString& gS_unresolved, const std::set<std::string>& kMers_reference, DeBruijnGraph<m, k, colours>* graph, std::set<std::string>* kMers_in_dGS, std::set<std::string>* kMers_in_dGS_in_sample, std::map<std::string, double>* kMers_in_dGS_optimality, std::string nameForSummary, ofstream& summaryFileStream, std::string pathForSpatialSummary, std::vector<std::vector<int> > chromotypes_referencePositions);
 
 template<int m, int k>
-void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::string deBruijnGraph, int kMer_size, int cortex_height, int cortex_width, std::string outputDirectory, int threads);
+void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::string deBruijnGraph, int cortex_height, int cortex_width, std::string outputDirectory, int threads, bool onlyPASS);
 
 template<int m, int k, int colours>
 std::pair<diploidGenomeString, diploidGenomeString> greedilyResolveDiploidKMerString(diploidGenomeString& original_gS, DeBruijnGraph<m, k, colours>* graph);
 
 
 template<int m, int k>
-void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::string deBruijnGraph, int kMer_size, int cortex_height, int cortex_width, std::string outputDirectory, int threads)
+void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::string deBruijnGraph, int cortex_height, int cortex_width, std::string outputDirectory, int threads, bool onlyPASS)
 {
 	omp_set_num_threads(threads);
 	assert(omp_get_num_threads() == threads);
+	int kMer_size = k;
 
 	std::string configFileOutputPath= outputDirectory + "/validationDetails.txt";
 
@@ -56,6 +57,9 @@ void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::
 	configOutputStream << "deBruijnGraph" << " = " << deBruijnGraph << "\n";
 	configOutputStream << "VCF" << " = " << VCFfile << "\n";
 	configOutputStream << "referenceGenome" << " = " << referenceGenome << "\n";
+	configOutputStream << "onlyPASS" << " = " << onlyPASS << "\n";
+	configOutputStream << "threads" << " = " << threads << "\n";
+
 	configOutputStream.close();
 
 	std::cout << Utilities::timestamp() << "Allocate Cortex graph object with height = " << cortex_height << ", width = " << cortex_width << " ...\n" << std::flush;
@@ -105,7 +109,7 @@ void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::
 
 		std::cout << Utilities::timestamp() << " " << "Chromosome " << chromosome << ", convert VCF to diploidGS...\n" << std::flush;
 		std::vector<std::vector<int> > VCF_chromotypes_referencePositions;
-		diploidGenomeString VCF_chromotypes = VCF2GenomeString(chromosome, -1, -1, VCFfile, referenceGenome, VCF_chromotypes_referencePositions);
+		diploidGenomeString VCF_chromotypes = VCF2GenomeString(chromosome, -1, -1, VCFfile, referenceGenome, VCF_chromotypes_referencePositions, false, onlyPASS);
 		std::cout << Utilities::timestamp() << " " <<  "\n\tdone\n" << std::flush;
 
 		std::cout << Utilities::timestamp() << " " <<  "Chromosome " << chromosome << ", compress VCF diploidGS...\n" << std::flush;
@@ -116,13 +120,10 @@ void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::
 		diploidGenomeString VCF_chromotypes_resolved = greedilyResolveDiploidKMerString<m, k, 1>(VCF_chromotypes_compressed, &myGraph).second;
 		std::cout << Utilities::timestamp() << " " <<  "\n\tdone\n" << std::flush;
 
-
-
 		std::set<std::string> set_kMers_reference;
 		std::set<std::string> set_kMers_VCF;
 		std::set<std::string> set_kMers_VCF_present;
 		std::map<std::string, double> set_kMers_VCF_optimalities;
-
 
 		std::cout << Utilities::timestamp() << " " << "Chromosome " << chromosome << ", evaluate VCF chromotypes\n" << std::flush;
 		evaluate_dGS(VCF_chromotypes_resolved, VCF_chromotypes_compressed, set_kMers_reference, &myGraph, 0, 0, 0, "VCF"+chromosome, summaryFileStream, outputDirectory, VCF_chromotypes_referencePositions);
@@ -163,7 +164,7 @@ void evaluate_dGS(diploidGenomeString& gS, diploidGenomeString& gS_unresolved, c
 
 	size_t totalLevels = 0;
 
-	std::cout << Utilities::timestamp()  << "evaluate_dGS " << "A" << "\n" << std::flush; // todo remove
+	// std::cout << Utilities::timestamp()  << "evaluate_dGS " << "A" << "\n" << std::flush; // todo remove
 
 	for(unsigned int l = 0; l < gS.size(); l++)
 	{
@@ -187,7 +188,7 @@ void evaluate_dGS(diploidGenomeString& gS, diploidGenomeString& gS_unresolved, c
 		totalLevels += requiredSpace;
 	}
 
-	std::cout << Utilities::timestamp()  << "evaluate_dGS " << "B" << "\n" << std::flush; // todo remove
+	// std::cout << Utilities::timestamp()  << "evaluate_dGS " << "B" << "\n" << std::flush; // todo remove
 
 	std::vector<std::vector<std::string> > uncompressed_chromotypes;
 	std::vector<int> uncompressed_chromotypes_nGaps;
@@ -258,7 +259,7 @@ void evaluate_dGS(diploidGenomeString& gS, diploidGenomeString& gS_unresolved, c
 	}
 	assert(uncompressed_chromotypes.size() == uncompressed_chromotypes_nGaps.size());
 
-	std::cout << Utilities::timestamp()  << "evaluate_dGS " << "C" << "\n" << std::flush; // todo remove
+	// std::cout << Utilities::timestamp()  << "evaluate_dGS " << "C" << "\n" << std::flush; // todo remove
 
 	std::vector<int> uncompressed_chromotypes_referencePositions;
 	uncompressed_chromotypes_referencePositions.reserve(totalLevels);
@@ -327,7 +328,7 @@ void evaluate_dGS(diploidGenomeString& gS, diploidGenomeString& gS_unresolved, c
 		std::cerr << std::flush;
 	}
 
-	std::cout << Utilities::timestamp()  << "evaluate_dGS " << "E" << "\n" << std::flush; // todo remove
+	// std::cout << Utilities::timestamp()  << "evaluate_dGS " << "E" << "\n" << std::flush; // todo remove
 
 	assert(uncompressed_chromotypes.size() == uncompressed_chromotypes_diploid.size());
 	assert(uncompressed_chromotypes.size() == uncompressed_chromotypes_losePhasing.size());

@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
 	int cortex_width = 140;
 	int kMer_size = 31;
 	int threads = 40;
+	bool onlyPASS = false;
 
 	string vcfFile;
 	string referenceGenome;
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
 			cortex_width = Utilities::StrtoI(arguments.at(i+1));
 		}
 
-		if(arguments.at(i) == "--kmer")
+		if(arguments.at(i) == "--k")
 		{
 			kMer_size = Utilities::StrtoI(arguments.at(i+1));
 		}
@@ -72,6 +73,11 @@ int main(int argc, char *argv[]) {
 		if(arguments.at(i) == "--threads")
 		{
 			threads = Utilities::StrtoI(arguments.at(i+1));
+		}
+
+		if(arguments.at(i) == "--onlyPASS")
+		{
+			onlyPASS = Utilities::StrtoI(arguments.at(i+1));
 		}
 	}
 
@@ -110,7 +116,14 @@ int main(int argc, char *argv[]) {
 	}
 	assert(Utilities::directoryExists(outputDirectory));
 
-	validateCompleteVCF<1, 31>(vcfFile, referenceGenome, deBruijnGraph, kMer_size, cortex_height, cortex_width, outputDirectory, threads);
+	if(kMer_size == 31)
+	{
+		validateCompleteVCF<1, 31>(vcfFile, referenceGenome, deBruijnGraph, cortex_height, cortex_width, outputDirectory, threads, onlyPASS);
+	}
+	else
+	{
+		errEx("Unsupported kMer size - use a different value for --k.");
+	}
 
 	return 0;
 }
