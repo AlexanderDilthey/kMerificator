@@ -27,7 +27,6 @@ diploidGenomeString VCF2GenomeString(std::string chromosomeID, int positionStart
 diploidGenomeString compressGenomeString(diploidGenomeString gS);
 std::vector<double> kMer_PP(size_t observedCoverage, size_t upperBound, double coverage);
 
-
 template<int m, int k, int colours>
 void evaluate_dGS(diploidGenomeString& gS, diploidGenomeString& gS_unresolved, const std::set<std::string>& kMers_reference, DeBruijnGraph<m, k, colours>* graph, std::set<std::string>* kMers_in_dGS, std::set<std::string>* kMers_in_dGS_in_sample, std::map<std::string, double>* kMers_in_dGS_optimality, std::string nameForSummary, ofstream& summaryFileStream, std::string pathForSpatialSummary, std::vector<std::vector<int> > chromotypes_referencePositions);
 
