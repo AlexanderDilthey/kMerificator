@@ -42,7 +42,6 @@ template<int m, int k>
 void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::string deBruijnGraph, int kMer_size, int cortex_height, int cortex_width, std::string outputDirectory, int threads)
 {
 	omp_set_num_threads(threads);
-	assert(omp_get_num_threads() == threads);
 
 	std::string configFileOutputPath= outputDirectory + "/validationDetails.txt";
 
@@ -105,6 +104,9 @@ void validateCompleteVCF(std::string VCFfile, std::string referenceGenome, std::
 		std::string chromosome = chromosomes.at(chromosomeI);
 
 		std::cout << Utilities::timestamp() << " " << "Chromosome " << chromosome << ", convert VCF to diploidGS...\n" << std::flush;
+		
+		continue;
+		
 		std::vector<std::vector<int> > VCF_chromotypes_referencePositions;
 		diploidGenomeString VCF_chromotypes = VCF2GenomeString(chromosome, -1, -1, VCFfile, referenceGenome, VCF_chromotypes_referencePositions);
 		std::cout << Utilities::timestamp() << " " <<  "\n\tdone\n" << std::flush;
