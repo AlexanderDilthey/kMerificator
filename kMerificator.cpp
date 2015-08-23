@@ -25,13 +25,16 @@ int main(int argc, char *argv[]) {
 	int cortex_width = 140;
 	int kMer_size = 31;
 	int threads = 40;
+	int maximumHaplotypePairs = 200;
+	
 	bool onlyPASS = false;
 
 	string vcfFile;
 	string referenceGenome;
 	string deBruijnGraph;
 	string outputDirectory;
-
+	string regions;
+	
 	for(unsigned int i = 0; i < arguments.size(); i++)
 	{
 		if(arguments.at(i) == "--vcf")
@@ -79,6 +82,16 @@ int main(int argc, char *argv[]) {
 		{
 			onlyPASS = Utilities::StrtoI(arguments.at(i+1));
 		}
+		
+		if(arguments.at(i) == "--maximumHaplotypePairs")
+		{
+			maximumHaplotypePairs = Utilities::StrtoI(arguments.at(i+1));
+		}
+		
+		if(arguments.at(i) == "--regions")
+		{
+			regions = arguments.at(i+1);
+		}		
 	}
 
 	if(vcfFile.length() == 0)
@@ -118,7 +131,7 @@ int main(int argc, char *argv[]) {
 
 	if(kMer_size == 31)
 	{
-		validateCompleteVCF<1, 31>(vcfFile, referenceGenome, deBruijnGraph, cortex_height, cortex_width, outputDirectory, threads, onlyPASS);
+		validateCompleteVCF<1, 31>(vcfFile, referenceGenome, deBruijnGraph, cortex_height, cortex_width, maximumHaplotypePairs, outputDirectory, threads, onlyPASS, regions);
 	}
 	else
 	{

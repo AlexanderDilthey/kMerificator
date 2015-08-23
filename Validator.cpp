@@ -141,15 +141,14 @@ diploidGenomeString compressGenomeString(diploidGenomeString gS)
 	return forReturn;
 }
 
-diploidGenomeString VCF2GenomeString(std::string chromosomeID, int positionStart, int positionStop, std::string VCFpath, std::string referenceGenomePath, std::vector<std::vector<int> >& ret_graph_referencePositions, bool ignoreVCF, bool onlyPASS)
+diploidGenomeString VCF2GenomeString(std::string chromosomeID, int positionStart, int positionStop, std::string VCFpath, std::vector<std::vector<int> >& ret_graph_referencePositions, bool ignoreVCF, bool onlyPASS, const map<string, string>& referenceGenome)
 {
 
-	map<string, string> referenceGenome = Utilities::readFASTA(referenceGenomePath);
 	if(! referenceGenome.count(chromosomeID))
 	{
-		std::cerr << "Error: reference genome " << referenceGenomePath << " does not seem to contain chromosome " << chromosomeID << "\n";
+		std::cerr << "Error: reference genome does not seem to contain chromosome " << chromosomeID << "\n";
 		std::cerr << "Available chromosomes:\n";
-		for(map<string, string>::iterator chrIt = referenceGenome.begin(); chrIt != referenceGenome.end(); chrIt++)
+		for(map<string, string>::const_iterator chrIt = referenceGenome.begin(); chrIt != referenceGenome.end(); chrIt++)
 		{
 			std::cerr << " - " << chrIt->first << "\n";
 		}
